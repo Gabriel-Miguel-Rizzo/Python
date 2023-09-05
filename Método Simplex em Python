@@ -1,12 +1,6 @@
-'''
-
-                            Online Python Compiler.
-                Code, Compile, Run and Debug python program online.
-Write your code in this editor and press "Run" button to execute it.
-
-'''
-
 qtdVariaveis = int(input("Digite a quantidade de variáveis da função objetivo: "))
+qtdRestricoes = int(input("Digite a quantidade de restricoes(variaveis de sobra) sob a função objetivo: "))
+
 print("Vamos formar a matriz com a seguinte configuração (Exemplo 3 variaveis):\n")
 print("            z | x1 | x2 | x3 | f1 | f2 | f3 | L.D | Quociente\n"
  "linha  z|   -    -    -    -    -    -    -    -      -\n"
@@ -14,29 +8,29 @@ print("            z | x1 | x2 | x3 | f1 | f2 | f3 | L.D | Quociente\n"
  "linha x2|   -    -    -    -    -    -    -    -      -\n"
  "linha x3|   -    -    -    -    -    -    -    -      -\n")
 
-
+qtdColunas = qtdVariaveis + qtdRestricoes + 3
+qtdLinhas = qtdRestricoes + 1
 contador = 1
-nmLinhas = qtdVariaveis + 1
-nmColunas = (qtdVariaveis * 2) + 3
+menor = 10000
+maior = -10000
+#nmLinhas = qtdVariaveis + 1
 
 print("\n")
-
-
-"""for contador in range(qtdVariaveis):
-    print(Coeficientes_de_X[contador] + "X1\n")"""
     
 
-matriz_simplex = [[0] * nmColunas for _ in range(nmLinhas) ]
+matriz_simplex = [[0] * qtdColunas for _ in range(qtdLinhas) ]
 
 
 
 
 
-for i in range(nmLinhas) :
-    for j in range(nmColunas):
+for i in range(qtdLinhas) :
+    for j in range(qtdColunas):
          
-       matriz_simplex[i][j] = input("Insira o valor do elemento " + str(i) +","+ str(j) + ": ")
+       matriz_simplex[i][j] = float(input("Insira o valor do elemento " + str(i) +","+ str(j) + ": "))
 
+for j in range(qtdColunas):
+    matriz_simplex[0][j] = matriz_simplex[0][j] * (-1)
 
 
 for i in matriz_simplex:
@@ -44,10 +38,30 @@ for i in matriz_simplex:
     # Itera pelos elementos em cada linha
     
     for j in i:
-        print(j, end=' ')  # Usamos end=' ' para imprimir na mesma linha
+        print(j, end='  ')  # Usamos end=' ' para imprimir na mesma linha
     print()  
     
-    
-    
+      
+
+for vlPrimeiraLinha in range(qtdLinhas):
+    if matriz_simplex[0][vlPrimeiraLinha] <= menor:
+        menor = matriz_simplex[0][vlPrimeiraLinha]
+        localMenorLinhaPivo = menor
+        colunaPivo = vlPrimeiraLinha
+        
+print("Aqui está: " + str(localMenorLinhaPivo))
+menor = 10000
+
+
+for j in range(qtdColunas):
+    if matriz_simplex[j][colunaPivo] > menor:
+        menor = matriz_simplex[j][colunaPivo]
+        localMenorColunaPivo = menor
+        
+
+
+
+print("Aqui está: " + str(localMenorColunaPivo))
+
     
 
