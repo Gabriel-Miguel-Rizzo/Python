@@ -1,0 +1,37 @@
+contador = 1
+
+qtdVariaveis = int(input("Digite a quantidade de variáveis da função objetivo: "))
+
+Coeficientes_de_X = [None] * qtdVariaveis
+
+for contador in range(qtdVariaveis):
+    Coeficientes_de_X[contador] = input("Digite o coeficiente de X" + str(contador) + ": ")
+
+contador = 1
+print("\n")
+
+
+"""for contador in range(qtdVariaveis):
+    print(Coeficientes_de_X[contador] + "X1\n")"""
+    
+
+matriz_simplex = [[0] * ((qtdVariaveis * 2) + 3) for _ in range(qtdVariaveis + 1) ]
+
+
+
+for i in range(qtdVariaveis + 1) :
+    for j in range((qtdVariaveis * 2) + 3):
+         
+       matriz_simplex[i][j] = input("Insira o valor do elemento " + str(i) +","+ str(j) + ": ")
+
+
+for i in matriz_simplex:
+    
+    # Itera pelos elementos em cada linha
+    
+    for j in i:
+        print(j, end=' ')  # Usamos end=' ' para imprimir na mesma linha
+    print()  
+    
+    
+
