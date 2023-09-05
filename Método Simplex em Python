@@ -1,3 +1,11 @@
+'''
+
+                            Online Python Compiler.
+                Code, Compile, Run and Debug python program online.
+Write your code in this editor and press "Run" button to execute it.
+
+'''
+
 qtdVariaveis = int(input("Digite a quantidade de variáveis da função objetivo: "))
 qtdRestricoes = int(input("Digite a quantidade de restricoes(variaveis de sobra) sob a função objetivo: "))
 
@@ -46,22 +54,31 @@ for i in matriz_simplex:
 for vlPrimeiraLinha in range(qtdLinhas):
     if matriz_simplex[0][vlPrimeiraLinha] <= menor:
         menor = matriz_simplex[0][vlPrimeiraLinha]
-        localMenorLinhaPivo = menor
+        localMenorLinha = menor
         colunaPivo = vlPrimeiraLinha
         
-print("Aqui está: " + str(localMenorLinhaPivo))
+print("Aqui está 1: " + str(localMenorLinha))
+print("Aqui está 1.1: " + str(colunaPivo))
+
 menor = 10000
 
+for j in range(qtdLinhas):
+    if matriz_simplex[j][colunaPivo] > 0 and matriz_simplex[j][colunaPivo - 1] > 0:
+        matriz_simplex[j][colunaPivo] = (matriz_simplex[j][colunaPivo - 1] / matriz_simplex[j][colunaPivo])
+        print("Teste: ")
+        print(str(matriz_simplex[j][colunaPivo]) + "\n")
 
-for j in range(qtdColunas):
-    if matriz_simplex[j][colunaPivo] > menor:
+
+
+
+
+
+
+"""for j in range(qtdLinhas):
+    if matriz_simplex[j][colunaPivo] < menor:
         menor = matriz_simplex[j][colunaPivo]
         localMenorColunaPivo = menor
         
+print("Aqui está 2: " + str(localMenorColunaPivo)) """
 
-
-
-print("Aqui está: " + str(localMenorColunaPivo))
-
-    
 
