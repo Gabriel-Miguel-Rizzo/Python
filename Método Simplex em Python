@@ -56,22 +56,17 @@ print("Coluna Pivo: " + str(colunaPivo))
 menor = 10000
 
 for j in range(qtdLinhas):
-    #if matriz_simplex[j][colunaPivo] > 0 and matriz_simplex[j][qtdColunas - 2] > 0:
+    if matriz_simplex[j][colunaPivo] > 0 and matriz_simplex[j][qtdColunas - 2] > 0:
         matriz_simplex[j][qtdColunas -1] = (matriz_simplex[j][qtdColunas - 2] / matriz_simplex[j][colunaPivo])
         print("Cociente " + str(j) + " :")
         print(str(matriz_simplex[j][qtdColunas - 1]) + "\n")
 
+menorQuociente = 10000
 
-
-
-
-
-
-"""for j in range(qtdLinhas):
-    if matriz_simplex[j][colunaPivo] < menor:
-        menor = matriz_simplex[j][colunaPivo]
-        localMenorColunaPivo = menor
-        
-print("Aqui está 2: " + str(localMenorColunaPivo)) """
-
-
+for j in range(qtdLinhas):
+    matriz_simplex[j][qtdColunas -1] < menorQuociente
+    menorQuociente = matriz_simplex[j][qtdColunas -1]
+    LinhaPivo = j
+    
+print("Menor Quociente: " + str(menorQuociente))
+print("Linha pivo igual a: " + str(LinhaPivo))
