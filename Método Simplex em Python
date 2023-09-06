@@ -33,16 +33,15 @@ for i in range(qtdLinhas) :
 for j in range(qtdColunas):
     matriz_simplex[0][j] = matriz_simplex[0][j] * (-1)
 
+#lê a matriz (parametro)
+def ler_matriz():
+    for i in matriz_simplex:
+        for j in i:
+            print(j, end='  ')  # Usamos end=' ' para imprimir na mesma linha
+        print()    
 
-for i in matriz_simplex:
-    
-    # Itera pelos elementos em cada linha
-    
-    for j in i:
-        print(j, end='  ')  # Usamos end=' ' para imprimir na mesma linha
-    print()  
-    
-      
+ler_matriz() #executa a procedure de leitura
+
 
 for vlPrimeiraLinha in range(qtdLinhas):
     if matriz_simplex[0][vlPrimeiraLinha] <= menor:
@@ -67,6 +66,26 @@ for j in range(qtdLinhas):
     matriz_simplex[j][qtdColunas -1] < menorQuociente
     menorQuociente = matriz_simplex[j][qtdColunas -1]
     LinhaPivo = j
+
+
+#com a localização da linha e da coluna pivo, podemos encontrar o coeficiente pivo
+coeficientePivo = matriz_simplex[LinhaPivo][colunaPivo]
+    
     
 print("Menor Quociente: " + str(menorQuociente))
 print("Linha pivo igual a: " + str(LinhaPivo))
+print("Coeficiente Pivo igual a: " + str(coeficientePivo))
+
+#Dividir toda a linha pivo pelo coeficiente pivo
+for j in range(qtdColunas):
+    if matriz_simplex[LinhaPivo][j] != 0:
+        matriz_simplex[LinhaPivo][j] = matriz_simplex[LinhaPivo][j] / coeficientePivo
+        
+
+print()
+print("Nova Matriz: ")
+print()
+
+ler_matriz()  #executa a procedure de leitura
+
+
