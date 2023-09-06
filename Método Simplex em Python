@@ -20,7 +20,7 @@ print("\n")
 
 matriz_simplex = [[0] * qtdColunas for _ in range(qtdLinhas) ]
 
-
+matriz_simplex_carga = [[0] * qtdColunas for _ in range(qtdLinhas) ]
 
 
 # Recebe os valores
@@ -87,5 +87,20 @@ print("Nova Matriz: ")
 print()
 
 ler_matriz()  #executa a procedure de leitura
+
+for i in range(1,qtdColunas):
+    if matriz_simplex[0][i] < 0 :
+        contador = i
+        print("Contador: " + str(contador))
+        #Nova coluna 0
+        for j in range(1,qtdColunas):
+            matriz_simplex_carga[0][j] =  matriz_simplex[1][j] * abs(matriz_simplex[0][colunaPivo])
+            
+        for k in range(1,qtdColunas):
+            matriz_simplex[0][k] = matriz_simplex_carga[0][k] + matriz_simplex[0][k]
+            print("Aqui está: " + str(matriz_simplex[0][k]))
+            
+
+
 
 
