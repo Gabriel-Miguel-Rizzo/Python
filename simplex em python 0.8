@@ -1,0 +1,108 @@
+#import numpy as np
+
+qtdVariaveis = int(input("Digite a quantidade de variáveis da função objetivo: "))
+qtdRestricoes = int(input("Digite a quantidade de restricoes(variaveis de sobra) sob a função objetivo: "))
+
+print("Vamos formar a matriz com a seguinte configuração (Exemplo 3 variaveis):\n")
+print("            z | x1 | x2 | x3 | f1 | f2 | f3 | L.D | Quociente\n"
+ "linha  z|   -    -    -    -    -    -    -    -      -\n"
+ "linha x1|   -    -    -    -    -    -    -    -      -\n"
+ "linha x2|   -    -    -    -    -    -    -    -      -\n"
+ "linha x3|   -    -    -    -    -    -    -    -      -\n")
+
+qtdColunas = qtdVariaveis + qtdRestricoes + 3
+qtdLinhas = qtdRestricoes + 1
+contador = 1
+menor = 10000
+maior = -10000
+#nmLinhas = qtdVariaveis + 1
+
+print("\n")
+    
+
+matriz_simplex = [[0] * qtdColunas for _ in range(qtdLinhas) ]
+
+matriz_simplex_carga = [[0] * qtdColunas for _ in range(qtdLinhas) ]
+
+
+# Recebe os valores
+for i in range(qtdLinhas) :
+    for j in range(qtdColunas):
+         
+       matriz_simplex[i][j] = float(input("Insira o valor do elemento " + str(i) +","+ str(j) + ": "))
+
+# Multiplica a primeira linha por (-1)
+for j in range(qtdColunas):
+    matriz_simplex[0][j] = matriz_simplex[0][j] * (-1)
+
+#lê a matriz (parametro)
+def ler_matriz():
+    for i in matriz_simplex:
+        for j in i:
+            print(j, end='  ')  # Usamos end=' ' para imprimir na mesma linha
+        print()    
+
+ler_matriz() #executa a procedure de leitura
+
+
+for vlPrimeiraLinha in range(qtdLinhas):
+    if matriz_simplex[0][vlPrimeiraLinha] <= menor:
+        menor = matriz_simplex[0][vlPrimeiraLinha]
+        localMenorLinha = menor
+        colunaPivo = vlPrimeiraLinha
+        
+print("Menor Valor da Linha 0: " + str(localMenorLinha))
+print("Coluna Pivo: " + str(colunaPivo))
+
+menor = 10000
+
+for j in range(qtdLinhas):
+    if matriz_simplex[j][colunaPivo] > 0 and matriz_simplex[j][qtdColunas - 2] > 0:
+        matriz_simplex[j][qtdColunas -1] = (matriz_simplex[j][qtdColunas - 2] / matriz_simplex[j][colunaPivo])
+        print("Cociente " + str(j) + " :")
+        print(str(matriz_simplex[j][qtdColunas - 1]) + "\n")
+
+menorQuociente = 10000
+
+for j in range(1,qtdLinhas):
+    if matriz_simplex[j][qtdColunas -1] < menorQuociente:
+        menorQuociente = matriz_simplex[j][qtdColunas -1]
+        LinhaPivo = j
+
+
+#com a localização da linha e da coluna pivo, podemos encontrar o coeficiente pivo
+coeficientePivo = matriz_simplex[LinhaPivo][colunaPivo]
+    
+    
+print("Menor Quociente: " + str(menorQuociente))
+print("Linha pivo igual a: " + str(LinhaPivo))
+print("Coeficiente Pivo igual a: " + str(coeficientePivo))
+
+#Dividir toda a linha pivo pelo coeficiente pivo
+for j in range(qtdColunas):
+    if matriz_simplex[LinhaPivo][j] != 0:
+        matriz_simplex[LinhaPivo][j] = matriz_simplex[LinhaPivo][j] / coeficientePivo
+        
+
+print()
+print("Nova Matriz: ")
+print()
+
+ler_matriz()  #executa a procedure de leitura
+
+for i in range(1,qtdColunas):
+    if matriz_simplex[0][i] < 0 :
+        contador = i
+        print("Contador: " + str(contador))
+        #Nova coluna 0
+        for j in range(1,qtdColunas):
+            matriz_simplex_carga[0][j] =  matriz_simplex[1][j] * abs(matriz_simplex[0][colunaPivo])
+            
+        for k in range(1,qtdColunas):
+            matriz_simplex[0][k] = matriz_simplex_carga[0][k] + matriz_simplex[0][k]
+            print("Aqui está: " + str(matriz_simplex[0][k]))
+
+  
+print()
+ler_matriz()
+print()
