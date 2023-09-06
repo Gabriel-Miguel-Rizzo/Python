@@ -1,11 +1,3 @@
-'''
-
-                            Online Python Compiler.
-                Code, Compile, Run and Debug python program online.
-Write your code in this editor and press "Run" button to execute it.
-
-'''
-
 qtdVariaveis = int(input("Digite a quantidade de variáveis da função objetivo: "))
 qtdRestricoes = int(input("Digite a quantidade de restricoes(variaveis de sobra) sob a função objetivo: "))
 
@@ -31,12 +23,13 @@ matriz_simplex = [[0] * qtdColunas for _ in range(qtdLinhas) ]
 
 
 
-
+# Recebe os valores
 for i in range(qtdLinhas) :
     for j in range(qtdColunas):
          
        matriz_simplex[i][j] = float(input("Insira o valor do elemento " + str(i) +","+ str(j) + ": "))
 
+# Multiplica a primeira linha por (-1)
 for j in range(qtdColunas):
     matriz_simplex[0][j] = matriz_simplex[0][j] * (-1)
 
@@ -57,16 +50,16 @@ for vlPrimeiraLinha in range(qtdLinhas):
         localMenorLinha = menor
         colunaPivo = vlPrimeiraLinha
         
-print("Aqui está 1: " + str(localMenorLinha))
-print("Aqui está 1.1: " + str(colunaPivo))
+print("Menor Valor da Linha 0: " + str(localMenorLinha))
+print("Coluna Pivo: " + str(colunaPivo))
 
 menor = 10000
 
 for j in range(qtdLinhas):
-    if matriz_simplex[j][colunaPivo] > 0 and matriz_simplex[j][colunaPivo - 1] > 0:
-        matriz_simplex[j][colunaPivo] = (matriz_simplex[j][colunaPivo - 1] / matriz_simplex[j][colunaPivo])
-        print("Teste: ")
-        print(str(matriz_simplex[j][colunaPivo]) + "\n")
+    #if matriz_simplex[j][colunaPivo] > 0 and matriz_simplex[j][qtdColunas - 2] > 0:
+        matriz_simplex[j][qtdColunas -1] = (matriz_simplex[j][qtdColunas - 2] / matriz_simplex[j][colunaPivo])
+        print("Cociente " + str(j) + " :")
+        print(str(matriz_simplex[j][qtdColunas - 1]) + "\n")
 
 
 
