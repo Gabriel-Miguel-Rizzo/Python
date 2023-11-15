@@ -1,0 +1,236 @@
+import pymysql
+import sys
+#import os
+
+"""
+Executor de comandos CRUD automático para uma tabela específica
+"""
+
+
+conexao = pymysql.connect(
+    host= 'localhost',
+    user= 'root',
+    passwd= '',
+    database= "conexaoaps"
+)
+
+
+def menu_principal():
+    print('----------MENU DE OPÇÕES----------')
+    print('(1) Cadastrar um novo investidor')
+    print('(2) Consultar investidor')
+    print('(3) Editar investidor')
+    print('(4) Excluir investidor')
+    print('(0) Sair')
+
+def inserir():
+    #valores a serem inseridos
+    valor1 = input("Digite o nome do investidor: ")
+    valor2 = input("Digite o id do investidor: ")
+    valor3 = input("Digite o cnpj do investidor: ")
+    valor4 = input("Digite o valor investido: ")
+
+
+    # Inserir dados digitados pelo usuário
+    sql_insert = "INSERT INTO investidores (NOME, ID_INVESTIDOR, CNPJ, VALOR_INVESTIDO) VALUES (%s, %s, %s, %s)"
+    cursor.execute(sql_insert, (valor1, valor2, valor3, valor4))
+    conexao.commit()
+    print("Dados inseridos com sucesso! ")
+    print()
+
+def consultar():
+    print()
+    tabela_selecionada = input("Digite o nome da tabela para consulta: ")
+    id_selecionado = input("Digite o id do investidor que deseja visualizar: ")
+
+    sql_query = "SELECT * FROM {} WHERE ID_INVESTIDOR = %s".format(tabela_selecionada)
+
+    cursor.execute(sql_query,id_selecionado)
+
+    result = cursor.fetchall()
+            
+    print()
+
+    for row in result:
+         print(row)
+
+    print()
+    print("Investidor requerido acima! ")
+    print()
+
+def atualizar():
+    #opção 3 executar um Update na tabela investidores
+    #pergunta qual o investidor deseja modificar (digite o id do investidor que deseja alterar)
+    #switch case para cada coluna (ex1: mudar nome, ex5: multiplicar valor_investido por 20% (k * 1.2) )
+    #opção de (deseja modificar o Nome do investidor? (s/n)  if var == 's: (comando para mudar nome) )
+    id_selecionado = input("Digite o id do investidor que deseja modificar da tabela: ")
+
+    sql_query = "SELECT * FROM investidores  WHERE ID_INVESTIDOR = %s"
+
+
+    print("Aqui está a tupla do investidor selecionado:")
+    print()
+
+    #Executa a Query e percorre linha por linha, mostrando-a.
+    cursor.execute(sql_query,id_selecionado)
+    result = cursor.fetchall()
+    for row in result:
+        print(row)
+
+    print()
+
+    # Modificar o Nome do investidor
+    simNao = input("Gostaria de modificar o nome do investidor? (s/n): ")
+    if simNao == 's':
+        try:
+            print()
+            novoNome = input("Digite o novo nome do investidor: ")
+            sql = "UPDATE investidores SET NOME = %s WHERE ID_INVESTIDOR = %s"
+
+            cursor.execute(sql, (novoNome,id_selecionado))
+            conexao.commit()
+            print("UPDATE executado com sucesso!")
+            print()
+        except Exception as e:
+            print(f"Erro ao executar o UPDATE: {str(e)}")
+
+    else: 
+        print()
+        print("Tudo bem, prosseguindo para a próxima coluna.")
+        print()
+
+    # Modificar o ID do investidor
+    simNao = input("Gostaria de modificar o ID do investidor? (s/n): ")
+    if simNao == 's':
+        try:
+            print()
+            novoID = input("Digite o novo ID do investidor: ")
+            sql = "UPDATE investidores SET ID_INVESTIDOR = %s WHERE ID_INVESTIDOR = %s"
+
+            cursor.execute(sql, (novoID,id_selecionado))
+            conexao.commit()
+            print("UPDATE executado com sucesso!")
+            print()
+            id_selecionado = novoID
+
+        except Exception as e:
+            print(f"Erro ao executar o UPDATE: {str(e)}")
+
+    else: 
+        print()
+        print("Tudo bem, prosseguindo para a próxima coluna.")
+        print()
+
+
+    # Modificar o CNPJ do investidor
+    simNao = input("Gostaria de modificar o CNPJ do investidor? (s/n): ")
+    if simNao == 's':
+        try:
+            print()
+            novoCNPJ = input("Digite o novo CNPJ do investidor: ")
+            sql = "UPDATE investidores SET CNPJ = %s WHERE ID_INVESTIDOR = %s"
+
+            cursor.execute(sql, (novoCNPJ,id_selecionado))
+            conexao.commit()
+            print("UPDATE executado com sucesso!")
+            print()
+        except Exception as e:
+            print(f"Erro ao executar o UPDATE: {str(e)}")
+
+    else: 
+        print()
+        print("Tudo bem, prosseguindo para a próxima coluna.")
+        print()
+
+    # Modificar o Valor investido do investidor
+    simNao = input("Gostaria de modificar o Valor investido do investidor? (s/n): ")
+    if simNao == 's':
+        try:
+            print()
+            novoVI = input("Digite o novo valor investido do investidor: ")
+            sql = "UPDATE investidores SET VALOR_INVESTIDO = %s WHERE ID_INVESTIDOR = %s"
+
+            cursor.execute(sql, (novoVI,id_selecionado))
+            conexao.commit()
+            print("UPDATE executado com sucesso!")
+
+        except Exception as e:
+            print(f"Erro ao executar o UPDATE: {str(e)}")
+
+    print()
+    print("Update terminado com sucesso!")
+    print()
+
+def excluir():
+    try:
+        # Comando SQL para excluir a tabela
+        id_selecionado = input("Digite o id do investidor que deseja excluir da tabela: ")
+
+        sql_delete = "DELETE FROM investidores WHERE ID_INVESTIDOR = %s"
+
+        # Executar o comando SQL
+        cursor.execute(sql_delete, (id_selecionado,))
+
+        # Confirmar a exclusão (comitar)
+        conexao.commit()
+
+        # Confirmar a exclusão ao usuário.
+        print("Investidor excluído do Banco de Dados com sucesso.")
+        print()
+
+    except Exception as e:
+       print(f"Erro ao executar o UPDATE: {str(e)}")
+
+try:
+    cursor = conexao.cursor()
+
+    while True:
+    
+
+
+        
+        menu_principal()
+
+        opção = input("Digite a opção desejada: ")
+        opção = int(opção)
+        print()
+
+        while True:
+            if opção > 5 or opção < 0:
+                opção = int(input("Erro: Digite um número válido entre 0 e 4: "))
+                print()
+
+            else:
+                break  # Sai do loop se a opção for validada.
+
+        if opção == 0:
+            print("Obrigado por utilizar nosso programa. ")
+            sys.exit()
+  
+        # Cadastrar novo investidor
+        if opção == 1:
+            inserir()
+
+        # Consultar investidores
+        elif opção == 2:
+            consultar()
+
+        # Realizar atualização
+        elif opção == 3:
+            atualizar()
+
+        elif opção == 4:
+            excluir()
+
+
+
+
+      
+
+except Exception as e:
+    print(f"Erro ao executar o UPDATE: {str(e)}")
+
+finally:
+    # Fechar o cursor e a conexão
+    cursor.close()
+    conexao.close()
