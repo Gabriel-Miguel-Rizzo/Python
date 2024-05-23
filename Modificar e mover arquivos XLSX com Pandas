@@ -1,0 +1,26 @@
+import shutil
+import os
+import pandas as pd
+
+# Caminho do arquivo de origem
+caminho_origem = 'P:/BI/3. Relatórios/Giro Produtos/Apoio/Distribuição - Consolidado.xlsx'
+
+# Caminho para a pasta de destino
+caminho_destino = 'G:\Distribuicao_consolidado'
+
+# Copiar o arquivo de origem para o destino (substituindo se já existir)
+shutil.copy2(caminho_origem, caminho_destino)
+
+# Novo caminho para o arquivo Excel na pasta de destino
+caminho_arquivo_excel = os.path.join(caminho_destino, 'Distribuição - Consolidado.xlsx')
+
+# Ler o arquivo Excel
+df = pd.read_excel(caminho_arquivo_excel)
+
+# Nome do arquivo CSV na pasta de destino
+nome_arquivo_csv = os.path.join(caminho_destino, 'Distribuição - Consolidado.csv')
+
+# Salvar o DataFrame como um arquivo CSV
+df.to_csv(nome_arquivo_csv, index=False)
+
+print("Arquivo copiado e convertido com sucesso!")
