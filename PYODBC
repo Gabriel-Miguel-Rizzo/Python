@@ -1,0 +1,50 @@
+import pyodbc
+
+
+--retorna um dicionário com os nomes e descrições dos data sources ODBC disponíveis.
+print(pyodbc.dataSources())  
+
+
+-- Conexão Simples:
+import pyodbc
+import pandas as pd
+
+# Configurar os detalhes da conexão
+server = 'Servidor_do_banco_de_dados' 
+database = 'Nome do banco de dados' 
+username = 'Seu_Nome_de_Usuário' 
+password = 'Senha_do_banco_de_dados' 
+
+# Criar a string de conexão
+connection_string = f'DRIVER={{ODBC Driver 11 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'  #utilize de acordo com sua conexão ODBC
+
+# Estabelecer a conexão
+conn = pyodbc.connect(connection_string)
+
+# Criar um cursor
+cursor = conn.cursor()
+
+# Executar uma consulta
+cursor.execute("""
+SELECT top 10 
+    RTRIM(produto) AS PRODUTO, 
+    RTRIM(colecao) AS COLECAO, 
+    RTRIM(griffe) AS GRIFFE, 
+    RTRIM(linha) AS LINHA, 
+    RTRIM(grupo_produto) AS GRUPO_PRODUTO 
+FROM produtos 
+WHERE colecao = 'OUT24';
+""")
+
+# Buscar os resultados
+result = cursor.fetchall()
+
+# Fechar o cursor e a conexão
+cursor.close()
+conn.close()
+
+# Criar o DataFrame
+df = result
+
+# Printar o DataFrame
+print(df)
