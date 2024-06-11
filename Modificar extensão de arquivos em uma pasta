@@ -1,0 +1,20 @@
+import os
+
+# Caminho da pasta onde os arquivos estão localizados
+caminho_da_pasta = r'C:\caminho\para\meus_arquivos'
+
+# Lista os arquivos na pasta
+arquivos = os.listdir(caminho_da_pasta)
+
+# Itera sobre os arquivos na pasta
+for arquivo in arquivos:
+    # Verifica se o arquivo é um arquivo com a extensão .jpeg
+    if arquivo.endswith('.jpeg'):
+        # Constrói o novo nome de arquivo com a extensão .jpg
+        novo_nome = os.path.splitext(arquivo)[0] + '.jpg'
+        # Renomeia o arquivo
+        os.rename(os.path.join(caminho_da_pasta, arquivo), os.path.join(caminho_da_pasta, novo_nome))
+        print(f'Extensão modificada: {arquivo} -> {novo_nome}')
+
+
+--Modificar extensão de arquivos de uma pasta (.jpeg --> .jpg)
