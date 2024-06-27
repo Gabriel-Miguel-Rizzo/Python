@@ -1,0 +1,89 @@
+import shutil
+import pandas as pd
+import openpyxl
+from openpyxl import load_workbook
+import pyodbc
+
+# Caminho do arquivo de origem e destino para OH BOY
+caminho_origemOH = 'P:/BI/5. Automações/Python/Atacado/Apoio/Bases_Wise/Wise - OH BOY - Produtos.xls'
+caminho_destinoOH = 'G:/Consolidacao_Atacado/Wise-OH-BOY-Produtos.xlsx'
+
+# Copiar o arquivo de origem para o destino (substituindo se já existir)
+shutil.copy2(caminho_origemOH, caminho_destinoOH)
+
+# Caminho do arquivo de origem e destino para SACADA
+caminho_origemSA = 'P:/BI/5. Automações/Python/Atacado/Apoio/Bases_Wise/Wise - SACADA - Produtos.xls'
+caminho_destinoSA = 'G:/Consolidacao_Atacado/Wise-SACADA-Produtos.xlsx'
+
+# Copiar o arquivo de origem para o destino (substituindo se já existir)
+shutil.copy2(caminho_origemSA, caminho_destinoSA)
+
+# Ler o arquivo Excel OH BOY e SACADA
+dfoh = pd.read_excel(caminho_destinoOH, skiprows=3)
+dfsa = pd.read_excel(caminho_destinoSA, skiprows=3)
+
+# Remover mais 7 linhas abaixo das colunas (se aplicável)
+dfoh = dfoh.iloc[8:]
+dfsa = dfsa.iloc[8:]
+
+colunas_para_remover = ['Unnamed: 2','Unnamed: 3','Unnamed: 4','Unnamed: 5','Unnamed: 6','Unnamed: 7','Unnamed: 8','Unnamed: 9','Unnamed: 10'
+                       ,'Unnamed: 11','Unnamed: 12','Unnamed: 13','Unnamed: 14','Unnamed: 15','Unnamed: 16','Unnamed: 17','Unnamed: 19','Unnamed: 20','Unnamed: 21','Unnamed: 22' ]
+dfoh = dfoh.drop(columns=colunas_para_remover)
+dfsa = dfsa.drop(columns=colunas_para_remover)
+
+novos_nomes = {
+    'Unnamed: 0': 'PRODUTO',
+    'Unnamed: 1': 'COR',
+    'Unnamed: 18': 'QTDE',
+    'Unnamed: 23' : 'MARCA'
+}
+
+dfoh = dfoh.rename(columns=novos_nomes)
+dfsa = dfsa.rename(columns=novos_nomes)
+
+dfoh = dfoh.iloc[:-2]
+dfsa = dfsa.iloc[:-2]
+
+caminho_tempOH = 'G:/Consolidacao_Atacado/Wise-OH-BOY-Produtos_temp.xlsx'
+caminho_tempSA = 'G:/Consolidacao_Atacado/Wise-SACADA-Produtos_temp.xlsx'
+
+dfoh.to_excel(caminho_tempOH, index=False)
+dfsa.to_excel(caminho_tempSA, index=False)
+
+# Salvar os DataFrames resultantes em arquivos Excel .xlsx
+dfoh.to_excel('G:/Consolidacao_Atacado/Wise-OH-BOY-Produtos.xlsx', index=False)
+dfsa.to_excel('G:/Consolidacao_Atacado/Wise-SACADA-Produtos.xlsx', index=False)
+
+wb_oh = openpyxl.load_workbook(caminho_tempOH)
+wb_oh.active.title = 'produto'
+wb_oh.save(caminho_destinoOH)
+wb_oh.close()
+
+wb_oh = openpyxl.load_workbook(caminho_tempSA)
+wb_oh.active.title = 'produto'
+wb_oh.save(caminho_destinoSA)
+wb_oh.close()
+
+print("Arquivos copiados e processados com sucesso!")
+
+##########################################
+
+# Configurar os detalhes da conexão
+server = '***Nome do servidor aqui***' 
+database = '***Nome do banco de dados aqui***' 
+username = '***Nome de Usuário do DB aqui***' 
+password = '***Senha do DB aqui***' 
+
+# Criar a string de conexão
+connection_string = f'DRIVER={{ODBC Driver 11 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
+
+# Estabelecer a conexão
+conn = pyodbc.connect(connection_string)
+
+# Executar a procedure
+conn.execute("USE db_views EXEC BI_ATUALIZA_VENDAS_PROJECAO_ATACADO")
+
+conn.commit()
+
+# Fechar a conexão
+conn.close()
