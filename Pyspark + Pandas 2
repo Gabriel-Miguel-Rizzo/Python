@@ -1,0 +1,28 @@
+from pyspark.sql import SparkSession
+import pandas as pd
+
+# 1. Criar uma SparkSession
+spark = SparkSession.builder \
+    .appName("Exemplo PySpark SQL e pandas") \
+    .getOrCreate()
+
+# 2. Carregar o arquivo CSV em um DataFrame PySpark com delimitador apropriado
+df = spark.read.option("delimiter", ";").csv("C:/Users/BG-Gabriel C/Desktop/Lojas.csv", header=True, inferSchema=True)
+
+# 5. Registrar o DataFrame como uma tabela temporária
+df.createOrReplaceTempView("tabela_temporaria")
+
+# 7. Executar a consulta SQL (verifique os nomes das colunas)
+resultado = spark.sql("""
+    SELECT IDLOJA, NOVO_IDLOJA, NOME_LOJA
+    FROM tabela_temporaria
+    WHERE UPPER(NOME_LOJA) LIKE '%BARRA%'
+""")
+
+resultado_pandas = resultado.toPandas()
+
+# 7. Salvar o DataFrame pandas como um arquivo CSV
+resultado_pandas.to_csv("C:/Users/BG-Gabriel C/Desktop/Lojas_Teste/Lojas.csv", index=False)
+
+# 9. Parar a SparkSession
+spark.stop()
