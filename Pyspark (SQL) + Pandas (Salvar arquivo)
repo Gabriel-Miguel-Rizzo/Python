@@ -1,0 +1,28 @@
+from pyspark.sql import SparkSession
+
+# 1. Criar uma SparkSession
+spark = SparkSession.builder \
+    .appName("Exemplo PySpark SQL e pandas") \
+    .getOrCreate()
+
+# 2. Carregar o arquivo CSV em um DataFrame PySpark
+df = spark.read.csv("C:/Users/gabri/Desktop/Nova pasta (2)/DatasetRH.csv", header=True, inferSchema=True)
+
+# 3. Registrar o DataFrame como uma tabela temporária
+df.createOrReplaceTempView("tabela_temporaria")
+
+# 4. Executar uma consulta SQL para selecionar colunas e aplicar filtros
+resultado = spark.sql("""
+    SELECT Id_Funcionario, Idade, Genero
+    FROM tabela_temporaria
+    WHERE Idade > 20
+""")
+
+# 5. Converter o DataFrame PySpark para pandas
+resultado_pandas = resultado.toPandas()
+
+# 6. Salvar o DataFrame pandas como um arquivo CSV
+resultado_pandas.to_csv("C:/Users/gabri/Desktop/Nova pasta (2)/DADOS_TRATATOS_UNICO.csv", index=False)
+
+# Parar a SparkSession
+spark.stop()
