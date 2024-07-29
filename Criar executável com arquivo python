@@ -1,5 +1,5 @@
 PS C:\Users\gabriel.rizzo> cd "C:\Users\gabriel.rizzo\ATUALIZA_PROD_COR"
 PS C:\Users\gabriel.rizzo\ATUALIZA_PROD_COR> pyinstaller --onefile ATUALIZA_PROD_COR.py
 
-cd = define o local do arquivo
+cd  "Local/Do/Arquivo"
 "pyinstaller --onefile" cria o executável no local do arquivo
