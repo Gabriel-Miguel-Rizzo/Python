@@ -3,3 +3,5 @@ PS C:\Users\gabriel.rizzo\ATUALIZA_PROD_COR> pyinstaller --onefile ATUALIZA_PROD
 
 cd  "Local/Do/Arquivo"
 "pyinstaller --onefile" cria o executável no local do arquivo
+
+pyinstaller --onefile --noconsole meu_programa.py  // para esconder o console no executável do python
