@@ -1,0 +1,98 @@
+import tkinter as tk
+from tkinter import messagebox
+import pyodbc  
+import pandas as pd
+from pandastable import Table  
+
+
+# Função para conectar e executar a consulta
+def executar_consulta():
+    data_inicial = entry_data_inicial.get()
+    data_final = entry_data_final.get()
+
+    # Validação das datas
+    if not data_inicial or not data_final:
+        messagebox.showwarning("Aviso", "Por favor, insira a data Inicial e Final.")
+        return
+
+    # String de conexão
+    conexao_str = (
+        "DRIVER={SQL Server};"
+        "SERVER=(server);"
+        "DATABASE=(database);"
+        "UID=consulta;"
+        "PWD=utoL1J4NkA84n4fV;"
+    )
+    
+    try:
+        # Conectar ao banco de dados
+        conexao = pyodbc.connect(conexao_str)
+        cursor = conexao.cursor()
+
+        # Query SQL
+        sql = f"""
+        SELECT DISTINCT Z.FILIAL, sa.A1_EMAIL, sa.A1_CGC
+        FROM Zview_cupons_venda Z
+        LEFT JOIN SA1010 sa
+        ON (RTRIM(Z.CLI_VENDA) + RTRIM(Z.CLI_LOJA)) = RTRIM(sa.A1_COD) + RTRIM(sa.A1_LOJA)
+        WHERE Z.ECOMMERC LIKE '%ANY%'
+        AND Z.Data_EMISSAO BETWEEN '{data_inicial}' AND '{data_final}'
+        """
+
+        # Executar a consulta e buscar resultados
+        cursor.execute(sql)
+        rows = cursor.fetchall()
+        
+        # Fechar a conexão
+        cursor.close()
+        conexao.close()
+
+        # Exibir resultados na tabela
+        if rows:
+            # Converter os dados para um DataFrame
+            df = pd.DataFrame([tuple(row) for row in rows], columns=['FILIAL', 'EMAIL', 'CPF'])
+            mostrar_resultados(df)
+        else:
+            messagebox.showinfo("Info", "Nenhum resultado encontrado.")
+
+    except Exception as e:
+        messagebox.showerror("Erro", f"Ocorreu um erro: {e}")
+
+# Função para exibir os resultados em uma tabela
+def mostrar_resultados(df):
+    top = tk.Toplevel(root)
+    top.title("Resultados da Consulta")
+    table_frame = tk.Frame(top)
+    table_frame.pack(fill=tk.BOTH, expand=True)
+
+    # Criar uma tabela com os dados
+    tabela = Table(table_frame, dataframe=df, showtoolbar=True, showstatusbar=True)
+    tabela.show()
+
+# Configuração da janela principal
+
+root = tk.Tk()
+root.title("Consulta de Dados de Marketplace")
+root.geometry("500x200")
+
+# Labels e campos de entrada para as datas
+tk.Label(root, text="Data Inicial (yyyymmdd):", font=("Verdana", 12)).grid(row=0, column=0, padx=10, pady=20)
+entry_data_inicial = tk.Entry(root, font=("Verdana", 12))
+entry_data_inicial.grid(row=0, column=1, padx=20, pady=5)
+
+tk.Label(root, text="Data Final (yyyymmdd):", font=("Verdana", 12)).grid(row=1, column=0, padx=10, pady=1)
+entry_data_final = tk.Entry(root, font=("Verdana", 12))
+entry_data_final.grid(row=1, column=1, padx=20, pady=5)
+
+# Botão para executar a consulta
+btn_executar = tk.Button(
+    root,
+    text="Executar Consulta",
+    command=executar_consulta,
+    font=("Arial", 12),  # Aumenta o tamanho da fonte
+    width=20,            # Largura do botão em caracteres
+    height=2             # Altura do botão em linhas de texto
+)
+btn_executar.grid(row=2, column=0, columnspan=2, pady=40)
+
+root.mainloop()
