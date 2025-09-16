@@ -1,0 +1,350 @@
+#!/usr/bin/env python3
+"""
+Template Tkinter/ttk reutilizável
+- Menu (Arquivo, Editar, Exibir, Ajuda)
+- Toolbar com botões
+- Sidebar (navegação)
+- Main area com abas (Dashboard / Lista / Formulário)
+- Treeview (tabela) com scrolling
+- Statusbar
+- Theming (light/dark toggle)
+- Shortcuts e tratamento cross-platform
+- Fácil de estender: substitua/adicione widgets nos frames 'DashboardFrame', 'ListFrame', 'FormFrame'
+
+Funciona em Windows/Linux/macOS (depende do tema ttk disponível).
+"""
+
+import tkinter as tk
+from tkinter import ttk, messagebox
+import platform
+import sys
+import time
+import datetime
+import os
+from functools import partial
+import tkinter.font as tkfont
+
+# ---------- Utils ----------
+def resource_path(relpath: str) -> str:
+    """Retorna caminho absoluto (útil quando empacotar com PyInstaller)."""
+    base = getattr(sys, "_MEIPASS", os.path.abspath("."))
+    return os.path.join(base, relpath)
+
+def center_window(root, width=1100, height=700):
+    root.update_idletasks()
+    screen_w = root.winfo_screenwidth()
+    screen_h = root.winfo_screenheight()
+    x = max((screen_w - width) // 2, 0)
+    y = max((screen_h - height) // 2, 0)
+    root.geometry(f"{width}x{height}+{x}+{y}")
+
+def enable_scaling(root):
+    """Melhora suporte a telas HiDPI em Windows. Pode ser ampliado conforme necessidade."""
+    system = platform.system()
+    if system == "Windows":
+        try:
+            # solicita que tkinter use pixels reais em telas HiDPI
+            from ctypes import windll
+            windll.shcore.SetProcessDpiAwareness(1)
+        except Exception:
+            pass
+    # Ajuste global de escala (opcional)
+    default_font = tkfont.nametofont("TkDefaultFont")
+    # Se quiser alterar: default_font.configure(size=10)
+
+# ---------- Themed styles ----------
+def create_styles():
+    style = ttk.Style()
+    # Try to pick a modern theme if available
+    for t in ("clam", "alt", "default", "vista", "xpnative"):
+        try:
+            style.theme_use(t)
+            break
+        except Exception:
+            pass
+
+    # Generic style tweaks
+    style.configure("TButton", padding=6)
+    style.configure("TLabel", padding=3)
+    style.configure("Toolbutton.TButton", padding=4)
+    style.configure("Sidebar.TFrame", background="#f4f4f4")
+    style.configure("Status.TLabel", relief="sunken", anchor="w", padding=4)
+
+    # Treeview stripe
+    style.map("Treeview", background=[("selected", "#347083")])
+    style.configure("Treeview.Heading", font=("TkDefaultFont", 10, "bold"))
+    style.configure("Treeview", rowheight=22)
+
+    return style
+
+# ---------- App frames (modulares) ----------
+class DashboardFrame(ttk.Frame):
+    def __init__(self, parent, **kwargs):
+        super().__init__(parent, **kwargs)
+        # Exemplo simples de dashboard: KPIs
+        self.columnconfigure((0,1,2), weight=1)
+        kpis = [
+            ("Total Vendas", "1.234"),
+            ("Vendas Hoje", "56"),
+            ("Clientes Ativos", "312")
+        ]
+        for idx, (label, value) in enumerate(kpis):
+            card = ttk.Frame(self, padding=12, relief="ridge")
+            card.grid(row=0, column=idx, padx=8, pady=8, sticky="nsew")
+            ttk.Label(card, text=label).pack(anchor="w")
+            ttk.Label(card, text=value, font=("Helvetica", 20, "bold")).pack(anchor="w")
+
+        # Placeholder content
+        txt = ttk.Label(self, text="Área do dashboard — inclua gráficos, KPIs, resumo, etc.")
+        txt.grid(row=1, column=0, columnspan=3, sticky="nsew", padx=10, pady=10)
+
+class ListFrame(ttk.Frame):
+    def __init__(self, parent, **kwargs):
+        super().__init__(parent, **kwargs)
+        self.create_widgets()
+    def create_widgets(self):
+        # Barra de ferramentas da lista
+        toolbar = ttk.Frame(self)
+        toolbar.pack(fill="x", padx=4, pady=4)
+        ttk.Button(toolbar, text="Novo", command=self.on_new).pack(side="left")
+        ttk.Button(toolbar, text="Editar", command=self.on_edit).pack(side="left")
+        ttk.Button(toolbar, text="Excluir", command=self.on_delete).pack(side="left")
+        ttk.Button(toolbar, text="Atualizar", command=self.on_refresh).pack(side="left")
+
+        # Tabela (Treeview)
+        container = ttk.Frame(self)
+        container.pack(fill="both", expand=True, padx=6, pady=6)
+        columns = ("id", "nome", "valor", "data")
+        self.tree = ttk.Treeview(container, columns=columns, show="headings", selectmode="browse")
+        for col in columns:
+            self.tree.heading(col, text=col.title())
+            self.tree.column(col, anchor="w", width=120)
+        # Preencher com dados de exemplo
+        sample = [
+            (1, "Venda A", "R$ 120,00", "2025-09-01"),
+            (2, "Venda B", "R$ 250,50", "2025-09-14"),
+            (3, "Venda C", "R$ 99,90", "2025-09-15")
+        ]
+        for row in sample:
+            self.tree.insert("", "end", values=row)
+
+        vsb = ttk.Scrollbar(container, orient="vertical", command=self.tree.yview)
+        hsb = ttk.Scrollbar(container, orient="horizontal", command=self.tree.xview)
+        self.tree.configure(yscrollcommand=vsb.set, xscrollcommand=hsb.set)
+        self.tree.grid(row=0, column=0, sticky="nsew")
+        vsb.grid(row=0, column=1, sticky="ns")
+        hsb.grid(row=1, column=0, sticky="ew")
+        container.columnconfigure(0, weight=1)
+        container.rowconfigure(0, weight=1)
+
+    def on_new(self):
+        messagebox.showinfo("Novo", "Abrir formulário para novo item")
+    def on_edit(self):
+        sel = self.tree.selection()
+        if not sel:
+            messagebox.showwarning("Editar", "Selecione um item para editar")
+            return
+        vals = self.tree.item(sel[0], "values")
+        messagebox.showinfo("Editar", f"Editar item: {vals}")
+    def on_delete(self):
+        sel = self.tree.selection()
+        if not sel:
+            messagebox.showwarning("Excluir", "Selecione um item para excluir")
+            return
+        if messagebox.askyesno("Confirmar", "Deseja excluir o item selecionado?"):
+            self.tree.delete(sel[0])
+    def on_refresh(self):
+        messagebox.showinfo("Atualizar", "Atualizar lista (implemente sua lógica)")
+
+class FormFrame(ttk.Frame):
+    def __init__(self, parent, **kwargs):
+        super().__init__(parent, **kwargs)
+        self.create_widgets()
+    def create_widgets(self):
+        frm = ttk.Frame(self, padding=10)
+        frm.pack(fill="both", expand=True)
+        frm.columnconfigure(1, weight=1)
+
+        ttk.Label(frm, text="ID:").grid(row=0, column=0, sticky="w", pady=3)
+        self.entry_id = ttk.Entry(frm)
+        self.entry_id.grid(row=0, column=1, sticky="ew", pady=3)
+
+        ttk.Label(frm, text="Nome:").grid(row=1, column=0, sticky="w", pady=3)
+        self.entry_nome = ttk.Entry(frm)
+        self.entry_nome.grid(row=1, column=1, sticky="ew", pady=3)
+
+        ttk.Label(frm, text="Valor:").grid(row=2, column=0, sticky="w", pady=3)
+        self.entry_valor = ttk.Entry(frm)
+        self.entry_valor.grid(row=2, column=1, sticky="ew", pady=3)
+
+        ttk.Label(frm, text="Data:").grid(row=3, column=0, sticky="w", pady=3)
+        self.entry_data = ttk.Entry(frm)
+        self.entry_data.grid(row=3, column=1, sticky="ew", pady=3)
+        self.entry_data.insert(0, datetime.date.today().isoformat())
+
+        btns = ttk.Frame(frm)
+        btns.grid(row=4, column=0, columnspan=2, pady=8)
+        ttk.Button(btns, text="Salvar", command=self.on_save).pack(side="left", padx=4)
+        ttk.Button(btns, text="Limpar", command=self.on_clear).pack(side="left", padx=4)
+
+    def on_save(self):
+        # Implementar validação / persistência
+        data = {
+            "id": self.entry_id.get(),
+            "nome": self.entry_nome.get(),
+            "valor": self.entry_valor.get(),
+            "data": self.entry_data.get()
+        }
+        messagebox.showinfo("Salvar", f"Salvar dados: {data}")
+
+    def on_clear(self):
+        for e in (self.entry_id, self.entry_nome, self.entry_valor, self.entry_data):
+            e.delete(0, "end")
+
+# ---------- Main application ----------
+class App(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("Template App - Tkinter")
+        # Icon opcional: self.iconbitmap(resource_path("app.ico"))
+        enable_scaling(self)
+        center_window(self, width=1100, height=700)
+        self.style = create_styles()
+        self.create_ui()
+        self.bind_shortcuts()
+
+    def create_ui(self):
+        # Main layout: top menu, toolbar, left sidebar, content, statusbar
+        self.create_menu()
+        self.create_toolbar()
+        main = ttk.Frame(self)
+        main.pack(fill="both", expand=True)
+        main.columnconfigure(1, weight=1)
+        main.rowconfigure(0, weight=1)
+
+        # Sidebar
+        sidebar = ttk.Frame(main, width=220, style="Sidebar.TFrame")
+        sidebar.grid(row=0, column=0, sticky="nsw")
+        sidebar.grid_propagate(False)
+        self.build_sidebar(sidebar)
+
+        # Content (Notebook)
+        content = ttk.Frame(main)
+        content.grid(row=0, column=1, sticky="nsew")
+        content.columnconfigure(0, weight=1)
+        content.rowconfigure(0, weight=1)
+
+        self.notebook = ttk.Notebook(content)
+        self.notebook.grid(row=0, column=0, sticky="nsew")
+        # Frames
+        self.dashboard = DashboardFrame(self.notebook)
+        self.list_frame = ListFrame(self.notebook)
+        self.form_frame = FormFrame(self.notebook)
+        self.notebook.add(self.dashboard, text="Dashboard")
+        self.notebook.add(self.list_frame, text="Lista")
+        self.notebook.add(self.form_frame, text="Formulário")
+
+        # Statusbar
+        self.status = ttk.Label(self, text="Pronto", style="Status.TLabel")
+        self.status.pack(side="bottom", fill="x")
+
+    def create_menu(self):
+        menubar = tk.Menu(self)
+        # Arquivo
+        filemenu = tk.Menu(menubar, tearoff=0)
+        filemenu.add_command(label="Novo", accelerator="Ctrl+N", command=self.action_new)
+        filemenu.add_command(label="Abrir...", accelerator="Ctrl+O", command=self.action_open)
+        filemenu.add_separator()
+        filemenu.add_command(label="Sair", accelerator="Ctrl+Q", command=self.quit)
+        menubar.add_cascade(label="Arquivo", menu=filemenu)
+        # Editar
+        editmenu = tk.Menu(menubar, tearoff=0)
+        editmenu.add_command(label="Copiar", accelerator="Ctrl+C")
+        editmenu.add_command(label="Colar", accelerator="Ctrl+V")
+        menubar.add_cascade(label="Editar", menu=editmenu)
+        # Exibir
+        viewmenu = tk.Menu(menubar, tearoff=0)
+        viewmenu.add_command(label="Alternar Tema", accelerator="Ctrl+T", command=self.toggle_theme)
+        menubar.add_cascade(label="Exibir", menu=viewmenu)
+        # Ajuda
+        helpmenu = tk.Menu(menubar, tearoff=0)
+        helpmenu.add_command(label="Sobre", command=self.action_about)
+        menubar.add_cascade(label="Ajuda", menu=helpmenu)
+
+        self.config(menu=menubar)
+
+    def create_toolbar(self):
+        toolbar = ttk.Frame(self, relief="raised")
+        toolbar.pack(side="top", fill="x")
+        ttk.Button(toolbar, text="Novo (N)", command=self.action_new).pack(side="left", padx=2, pady=2)
+        ttk.Button(toolbar, text="Salvar (S)", command=self.action_save).pack(side="left", padx=2, pady=2)
+        ttk.Button(toolbar, text="Atualizar (R)", command=self.action_refresh).pack(side="left", padx=2, pady=2)
+        ttk.Label(toolbar, text="").pack(side="left", padx=6)
+        self.search_var = tk.StringVar()
+        ttk.Entry(toolbar, textvariable=self.search_var, width=30).pack(side="left", padx=4)
+        ttk.Button(toolbar, text="Buscar", command=self.action_search).pack(side="left", padx=2)
+
+    def build_sidebar(self, parent):
+        ttk.Label(parent, text="Navegação", font=("TkDefaultFont", 11, "bold")).pack(anchor="w", padx=8, pady=(8,2))
+        btns = [
+            ("Dashboard", lambda: self.notebook.select(0)),
+            ("Lista", lambda: self.notebook.select(1)),
+            ("Formulário", lambda: self.notebook.select(2)),
+        ]
+        for text, cmd in btns:
+            ttk.Button(parent, text=text, command=cmd).pack(fill="x", padx=8, pady=4)
+
+        # Espaço flexível
+        spacer = ttk.Frame(parent)
+        spacer.pack(expand=True, fill="both")
+
+        # Informações/versão
+        ttk.Label(parent, text="v1.0.0", anchor="center").pack(padx=8, pady=8)
+
+    # ---------- Actions ----------
+    def action_new(self, event=None):
+        self.notebook.select(2)
+        self.status.config(text="Criando novo item...")
+
+    def action_open(self, event=None):
+        messagebox.showinfo("Abrir", "Implementar diálogo de abrir arquivo")
+    def action_save(self, event=None):
+        messagebox.showinfo("Salvar", "Implementar salvar")
+    def action_refresh(self, event=None):
+        messagebox.showinfo("Atualizar", "Atualizando dados...")
+    def action_search(self, event=None):
+        q = self.search_var.get().strip()
+        messagebox.showinfo("Buscar", f"Buscar: {q}")
+
+    def action_about(self):
+        messagebox.showinfo("Sobre", "Template App\nDesenvolvido em Tkinter\nPersonalize à vontade")
+
+    def toggle_theme(self, event=None):
+        # Um toggle simples entre dois esquemas (claro/escuro) customizados.
+        # Ajuste conforme preferir ou remova se quiser usar themes nativas.
+        current = self.style.theme_use()
+        # tentativas simples: se for 'clam' -> 'alt', etc. Você pode criar estilos próprios.
+        alt = "alt" if current != "alt" else "clam"
+        try:
+            self.style.theme_use(alt)
+        except Exception:
+            pass
+        self.status.config(text=f"Tema alterado para {alt}")
+
+    def bind_shortcuts(self):
+        # Cross-platform shortcuts
+        if platform.system() == "Darwin":
+            mod = "Command"
+        else:
+            mod = "Control"
+        self.bind_all(f"<{mod}-n>", self.action_new)
+        self.bind_all(f"<{mod}-s>", self.action_save)
+        self.bind_all(f"<{mod}-q>", lambda e: self.quit())
+        self.bind_all(f"<{mod}-t>", self.toggle_theme)
+        # Other bindings
+        self.bind_all("<F5>", lambda e: self.action_refresh())
+
+# ---------- Run ----------
+if __name__ == "__main__":
+    app = App()
+    app.mainloop()
