@@ -1,0 +1,14 @@
+import tkinter as tk
+from tkinter import ttk, messagebox
+
+def atualizar_dados():
+    # Aqui você coloca sua lógica de back-end
+    messagebox.showinfo("Atualizar", "Dados foram atualizados com sucesso!")
+
+root = tk.Tk()
+root.title("Exemplo de Botões Tkinter")
+
+btn_atualizar = ttk.Button(root, text="Atualizar Dados", command=atualizar_dados)
+btn_atualizar.pack(padx=20, pady=20)
+
+root.mainloop()
